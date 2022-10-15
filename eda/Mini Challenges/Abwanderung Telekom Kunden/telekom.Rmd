@@ -1,0 +1,42 @@
+# Import der Packages
+```{r}
+library(ggplot2)
+library(png)
+library(tidyverse)
+```
+
+# Import der Daten
+```{r}
+path <- "telekom_kundenabgang.csv"
+data <- read.csv(path)
+```
+
+#
+```{r}
+data <- data %>% filter(!is.na(Churn))
+sum(data[,"tenure"])
+```
+
+# Tenure by age class and gender
+```{r}
+avg_tenure_by_gender <- data %>% 
+  group_by(gender) %>%
+  summarize(Mean = mean(tenure, na.rm=TRUE))
+
+avg_tenure_by_gender
+
+#tenure = beziehungsdauer
+
+ggplot(data, aes(x=gender, y=TotalCharges)) + 
+  geom_col() +
+  stat_summary(aes(label = stat(y)), fun = 'sum', geom = 'text', col = 'white', vjust = 1.5) +
+  facet_grid(cols = vars(SeniorCitizen), labeller = labeller(.cols = c('0'='Non-Senior Citizens','1'='Senior Citizens'))) +
+  labs(x = "Gender", y = "Total Charges", title = "Total charges by age class and gender") +
+  theme(axis.title=element_text(size=12,face="bold")) +
+  scale_y_continuous(labels = function(l) {l = l / 1000000; paste0(l, "M")})
+```
+# Churn rate by age class
+```{r}
+ggplot(data, aes(x=factor(SeniorCitizen),y=sum(Churn == "Yes"))) +
+  geom_col()
+```
